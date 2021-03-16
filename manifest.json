@@ -1,6 +1,6 @@
 {
   "name": "pixiv クイックブックマーク",
-  "version": "1.0",
+  "version": "1.1",
   "manifest_version": 2,
   "description": "pixivのイラストを右クリックメニューからブックマークできる拡張機能です。ポップアップからタグやコメントの設定が可能です。",
   "icons" : {
