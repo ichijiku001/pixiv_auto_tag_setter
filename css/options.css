@@ -1,0 +1,138 @@
+body {
+    width: 60%;
+    background-color: #f2f4f6;
+    margin: 0 auto;
+}
+
+#header {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 5px;
+}
+
+#header img {
+    height: 64px;
+}
+
+#container {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+#toolBar #presetList {
+    width: 180px;
+    padding: 10px;
+    border: solid 1px #ccc;
+    outline: none;
+}
+
+#toolBar button {
+    width: 90px;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    color: #ffffff;
+    font-size: 1.3em;
+    background-color: #0096fa;
+    border-radius: 4px;
+    transition: 0.3s;
+    margin-left: 5px;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+#toolBar button:hover {
+    background-color: #0086e0;
+}
+
+ul {
+    overflow-y: scroll;
+    height: 40vh;
+    padding: 10px 10px 9px 9px;
+    margin: 5px 0;
+    background-color: #fff;
+    border: solid 1px #ccc;
+    user-select: none;
+    list-style: none;
+}
+
+li {
+    display: inline-block;
+    margin: 0 0 1px 1px;
+    padding: 7px 4px;
+    cursor: pointer;
+    color: #5e9ece;
+}
+
+li:hover {
+    color: #fff;
+    background-color: #3e5b71;
+}
+
+li.selected {
+    background-color: #5596e6;
+    color: #fff;
+}
+
+div.inputArea {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 40px;
+    flex-direction: row;
+    margin-bottom: 5px;
+}
+
+.inputArea input[type="search"] {
+    width: 85%;
+    padding: 0 10px;
+    outline: none;
+    box-sizing: border-box;
+    border: solid 1px #ccc;
+    border-right: 0;
+}
+
+.inputArea input[type="search"]:focus {
+    background: #ffffcc;
+}
+
+.inputArea div.count {
+    display: flex;
+    width: 15%;
+    background-color: #e4e7ee;
+    font-size: 12px;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: solid 1px #ccc;
+    border-left: 0;
+}
+
+#radioArea span {
+    text-align: left;
+    color: #777;
+}
+
+#radioArea input[type="radio"] {
+    text-align: right;
+}
+
+#radioArea label {
+    cursor: pointer;
+}
+
+input[type="button"] {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    border: none;
+    color: #ffffff;
+    font-size: large;
+    background-color: #0096fa;
+    transition: 0.3s;
+    margin-bottom: 5px;
+}
+
+input[type="button"]:hover {
+    background-color: #0086e0;
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/options.css">
+    <title>設定 - pixiv クイックブックマーク</title>
+</head>
+
+<body>
+    <div id="container">
+        <div id="header">
+            <img src="/icon/header.png" alt="pixiv クイックブックマーク">
+        </div>
+
+        <div id="toolBar">
+            <span>プリセット：</span>
+            <select id="presetList"></select>
+            <button value="new">新規作成</button>
+            <button value="remove">削除</button>
+            <button value="rename">名前変更</button>
+            <button value="save">保存</button>
+        </div>
+
+        <form name="formData" action="#">
+            <div class="inputArea">
+                <input type="search" name="commentInput" placeholder="ブックマークコメント" maxlength="140">
+                <div class="count">
+                    <span id="commentCount">0 / 140</span>
+                </div>
+            </div>
+            <div class="inputArea">
+                <input type="search" name="tagInput" placeholder="ブックマークタグ">
+                <div class="count">
+                    <span id="tagCount">0 / 10</span>
+                </div>
+            </div>
+
+            <div id="radioArea">
+                <span>*スペース区切りで10個まで登録できます。英数字等は半角に統一されます。</span>
+                <input type="radio" name="privacy" id="release" value="0" checked><label for="release">公開</label>
+                <input type="radio" name="privacy" id="private" value="1"><label for="private">非公開</label>
+            </div>
+            <ul id="tagList"></ul>
+        </form>
+    </div>
+    <script type="module" src="/js/options.js"></script>
+</body>
+
+</html>

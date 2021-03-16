@@ -5,12 +5,38 @@ body {
 }
 
 #header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
     border-bottom: 1px solid #ccc;
     margin-bottom: 5px;
 }
 
 #header img {
+    margin-right: auto;
     height: 64px;
+}
+
+#presetList {
+    width: 120px;
+    padding: 5px;
+    margin-right: 5px;
+    border: solid 1px #ccc;
+    outline: none;
+}
+
+#setting {
+    width: 28px;
+    height: 28px;
+    fill: #3e5b71;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#setting:hover {
+    fill: #0096fa;
+    transform: rotate(180deg);
 }
 
 #container {
@@ -19,19 +45,18 @@ body {
 }
 
 ul {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: flex-start;
     overflow-y: scroll;
     height: 100px;
     padding: 10px 10px 9px 9px;
     margin: 5px 0;
     background-color: #fff;
+    border: solid 1px #ccc;
     user-select: none;
     list-style: none;
 }
 
 li {
+    display: inline-block;
     margin: 0 0 1px 1px;
     padding: 7px 4px;
     cursor: pointer;

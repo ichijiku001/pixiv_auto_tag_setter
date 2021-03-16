@@ -20,19 +20,42 @@ const prop = {
 
 chrome.contextMenus.create(prop);
 
-chrome.storage.local.get(["formData"], result => {
-    if (result.formData !== undefined) {
-        formData = result.formData;
-    }
-});
+Promise.resolve()
+.then(() => getStorage("selectedPreset"))
+.then(item => getStorage(item))
+.then(item => {
+    if (item !== undefined) formData = item;
+})
 
 chrome.storage.local.onChanged.addListener(result => {
-    if (result.formData) {
-        formData = result.formData.newValue;
+    if (result.selectedPreset) {
+        Promise.resolve()
+        .then(() => getStorage(result.selectedPreset.newValue))
+        .then(item => {
+            if (item === undefined) return;
+            formData = item;
+        })
+    } else {
+        for (let key in result) {
+            Promise.resolve()
+            .then(() => getStorage("selectedPreset"))
+            .then(item => {
+                if (item === key) formData = result[key].newValue;
+            })
+        }
     }
 });
 
 chrome.contextMenus.onClicked.addListener(bookmark);
+
+function getStorage(key) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get(key, item => {
+            if (key === null) resolve(item);
+            else resolve(item[key]);
+        })
+    })
+}
 
 function bookmark(object) {
     const illustId = object.linkUrl.split("https://www.pixiv.net/artworks/")[1];
@@ -49,7 +72,7 @@ function bookmark(object) {
             formData.tt = token;
             return formData;
         })
-        .then(compileFormData)
+        .then(data => compileFormData(data))
         .then(cmpData => Promise.all([addBookmark(illustId, cmpData), ImageToBase64(object.srcUrl)]))
         .then(result => {
             let text_restrict;
@@ -98,7 +121,7 @@ function compileFormData(data) {
     let compileData = "";
 
     for (key in data) {
-        if (!(key == "raw_tag" || key == "raw_comment")) {
+        if (!(key == "raw_tag" || key == "raw_comment" || key == "name")) {
             compileData += key + "=" + data[key] + "&";
         }
     }

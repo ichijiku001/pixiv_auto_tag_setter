@@ -1,82 +1,79 @@
+import * as Chrome from "./modules/chrome.js";
+import * as Common from "./modules/common.js";
+
 const ul = document.getElementById("tagList");
 const commentInput = formData.commentInput;
 const commentCount = document.getElementById("commentCount");
 const tagInput = formData.tagInput;
 const tagCount = document.getElementById("tagCount");
+const presetList = document.getElementById("presetList");
 const saveButton = formData.saveButton;
-
 let count = 0;
 
-restoreStorage();
 setInterval(checkTagInput, 100);
 
 tagInput.addEventListener("input", tagCounter);
 commentInput.addEventListener("input", commentCounter);
 saveButton.addEventListener("click", saveToStorage);
 
-chrome.cookies.get({url:"https://www.pixiv.net/", name:"PHPSESSID"}, cookie => setUserTag(cookie.value.split("_")[0]));
+presetList.addEventListener("change", () => {
+    Promise.resolve()
+    .then(() => Chrome.getStorage(presetList.options[presetList.selectedIndex].value))
+    .then(item => {
+        if (item === undefined) return;
+        formData.tagInput.value = item.raw_tag;
+        formData.commentInput.value = item.raw_comment;
+        formData.privacy.value = item.restrict;
+    })
+})
 
-function setUserTag(userId) {
-    fetch("https://www.pixiv.net/ajax/user/" + userId + "/illusts/bookmark/tags?lang=ja")
-    .then(handleErrors)
-    .then(res => res.json())
-    .then(data => {
-        function joinArray(arr1, arr2) {
-            for (let i = 0; i < arr1.length; i++) {
-                let check = arr2.findIndex(element => element.tag == arr1[i].tag);
-              
-                if (check !== -1) {
-                    if (arr1[i].cnt >= arr2[check].cnt) {
-                        arr2.splice(check, 1);
-                    } else if (arr1[i].cnt < arr2[check].cnt) {
-                        arr1.splice(i, 1);
-                        i--;
-                    }
-                }
-            }
-            
-            return arr1.concat(arr2);
-        }
+Promise.resolve()
+.then(() => Chrome.getStorage(null))
+.then(allItem => Common.setAllPreset(allItem))
+.then(() => Chrome.getStorage("selectedPreset"))
+.then(item => {
+    if (item === undefined) return;
+    for (let i = 0; i < presetList.options.length; i++) {
+        if (presetList.options[i].value === item) presetList.options[i].selected = true;   
+    }
+})
+.then(() => Chrome.getStorage(presetList.options[presetList.selectedIndex].value))
+.then(item => {
+    if (item === undefined) return;
+    formData.tagInput.value = item.raw_tag;
+    formData.commentInput.value = item.raw_comment;
+    formData.privacy.value = item.restrict;
+})
 
-        return joinArray(data.body.private, data.body.public);
-    })
-    .then(tag => {
-        for (let i = 0; i < tag.length; i++) {
-            let li = document.createElement("li");
-            li.innerText = tag[i].tag;
-            ul.appendChild(li);
-        }
-    })
-    .then(() => {
-        ul.addEventListener("click", tagInputToggle);
-        tagCounter();
-        commentCounter();
-    })
-    .catch(error => {
-        const errorTextElement = document.createElement("span");
-        ul.appendChild(errorTextElement);
-        switch (error) {
-            case 404:
-                errorTextElement.innerHTML = "タグの取得に失敗しました。\n 取得するには<a href='https://accounts.pixiv.net/login' target='_blank'>pixiv</a>にログインしてください。\n";
-                break;
-        
-            case "TypeError: Failed to fetch":
-                errorTextElement.innerHTML = "タグの取得に失敗しました。\n 取得するにはネットワークに接続してください。";
-                break;
-        }
-        
-    })
-}
-
-function handleErrors(response) {
-    return new Promise((resolve, reject) => {
-        if (!response.ok){
-            reject(response.status);
-        }
+Promise.resolve()
+.then(() => Chrome.getPHPSESSID())
+.then(PHPSESSID => Common.getBookmarkTag(PHPSESSID))
+.then(response => Common.handleErrors(response))
+.then(response => response.json())
+.then(obj => Common.joinArray(obj.body.private, obj.body.public))
+.then(tag => {
+    for (let i = 0; i < tag.length; i++) {
+        let li = document.createElement("li");
+        li.innerText = tag[i].tag;
+        ul.appendChild(li);
+    }
+})
+.then(() => tagCounter())
+.then(() => commentCounter())
+.then(() => ul.addEventListener("click", tagInputToggle))
+.catch(error => {
+    const errorTextElement = document.createElement("span");
+    ul.appendChild(errorTextElement);
+    switch (error) {
+        case 404:
+            errorTextElement.innerHTML = "タグの取得に失敗しました。\n 取得するには<a href='https://accounts.pixiv.net/login' target='_blank'>pixiv</a>にログインしてください。\n";
+            break;
     
-        resolve(response);
-    })
-}
+        case "TypeError: Failed to fetch":
+            errorTextElement.innerHTML = "タグの取得に失敗しました。\n 取得するにはネットワークに接続してください。";
+            break;
+    }
+})
 
 function tagInputToggle(event) {
     if (event.target.tagName == "LI"){
@@ -95,7 +92,7 @@ function tagInputToggle(event) {
         }
     }
 
-    tagInput.value = deleteExtraSpace(tagInput.value);
+    tagInput.value = Common.deleteExtraSpace(tagInput.value);
     tagCounter();
 }
 
@@ -120,41 +117,19 @@ function saveToStorage() {
         id: null, // illustId
         from_sid: "",
         type: "illust",
-        comment: fixedEncodeURIComponent(commentInput.value), // コメント
+        comment: Common.fixedEncodeURIComponent(commentInput.value), // コメント
         raw_comment: commentInput.value,
-        tag: fixedEncodeURIComponent(zenkakuToHankaku(tagInput.value)), // タグ
-        raw_tag: zenkakuToHankaku(tagInput.value),
-        restrict: formData.privacy.value // 0 = 公開, 1 = 非公開
+        tag: Common.fixedEncodeURIComponent(Common.zenkakuToHankaku(tagInput.value)), // タグ
+        raw_tag: Common.zenkakuToHankaku(tagInput.value),
+        restrict: formData.privacy.value, // 0 = 公開, 1 = 非公開
+        name: presetList.options[presetList.selectedIndex].innerText
     }
 
-    chrome.storage.local.set({"formData": data}, window.close());
-
-    function zenkakuToHankaku(str) {
-        str = deleteExtraSpace(str);
-        return str.replace(/[Ａ-Ｚａ-ｚ０-９！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［＼］＾＿｀｛｜｝]/g, function(s) {
-            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-        })
-    }
-
-    function fixedEncodeURIComponent(str) {
-        return encodeURIComponent(str).replace(/%20/g, "+");
-    }
-}
-
-function restoreStorage(){
-    chrome.storage.local.get(["formData"], result => {
-        if (result.formData.raw_tag !== undefined){
-            formData.tagInput.value = result.formData.raw_tag;
-        }
-        
-        if (result.formData.raw_comment !== undefined){
-            formData.commentInput.value = result.formData.raw_comment;
-        }
-        
-        if (result.formData.restrict !== undefined){
-            formData.privacy.value = result.formData.restrict;
-        }
-    });
+    Promise.resolve()
+    .then(() => Chrome.setStorage(presetList.options[presetList.selectedIndex].value, data))
+    .then(() => Chrome.setStorage("selectedPreset", presetList.options[presetList.selectedIndex].value))
+    .then(() => Chrome.setBadgeText(presetList.options[presetList.selectedIndex].innerText))
+    .then(() => window.close());
 }
 
 function checkTagInput() {
@@ -170,12 +145,4 @@ function checkTagInput() {
             e.classList.remove("selected");
         }
     });
-}
-
-function deleteExtraSpace(str) {
-    str = str.replace(/　/g, " ");
-    str = str.replace(/\s{2,}/g, " ");
-    str = str.replace(/^\s+|\s+$/g, "");
-
-    return str;
 }
